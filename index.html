@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paavai Engineering College - Advanced CSE Portal</title>
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.4);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --dark-bg: #0b0f19;
+            --glass-bg: rgba(17, 24, 39, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.07);
+            --text-main: #f8fafc;
+        }
+
+        .light-theme {
+            --dark-bg: #f1f5f9;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(15, 23, 42, 0.08);
+            --text-main: #0f172a;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .processor-bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.04) 0%, transparent 45%),
+                linear-gradient(rgba(59, 130, 246, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 35px 35px, 35px 35px;
+            z-index: -2;
+        }
+
+        .processor-bg-overlay::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.06) 40%, rgba(16, 185, 129, 0.04) 60%, transparent);
+            background-size: 100% 300px; animation: processorStreamerScan 7s linear infinite; z-index: -1;
+        }
+
+        @keyframes processorStreamerScan {
+            0% { background-position-y: -300px; }
+            100% { background-position-y: 100vh; }
+        }
+
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 5%;
+            background: rgba(11, 15, 25, 0.7); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border); position: sticky; top: 0; z-index: 100;
+        }
+
+        .nav-right-actions { display: flex; align-items: center; gap: 1rem; }
+        .logo {
+            font-size: 1.6rem; font-weight: 800; letter-spacing: 1px;
+            background: linear-gradient(45deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .container { padding: 3rem 4%; position: relative; z-index: 1; }
+
+        .view-section {
+            display: none; opacity: 0; transform: translateY(20px);
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-section.active-view { display: block; opacity: 1; transform: translateY(0); }
+
+        .hero-content { text-align: center; margin-top: 8vh; }
+        .hero-content h1 {
+            font-size: 3.5rem; margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ffffff, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .light-theme .hero-content h1 { background: linear-gradient(90deg, #0f172a, #475569); -webkit-background-clip: text; }
+        .hero-content h3 { font-size: 1.8rem; color: #60a5fa; font-weight: 400; }
+        
+        .quote-container { margin-top: 3rem; min-height: 80px; display: flex; justify-content: center; align-items: center; }
+        .quote {
+            font-style: italic; font-size: 1.4rem; color: #cbd5e1; max-width: 700px; line-height: 1.6;
+            border-left: 4px solid var(--primary); padding: 0.5rem 20px; opacity: 0; transform: scale(0.95);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; display: none;
+        }
+        .light-theme .quote { color: #334155; }
+        .quote.visible-quote { display: block; opacity: 1; transform: scale(1); }
+
+        .auth-box, .dashboard-card, .admin-box, .side-card {
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            padding: 2.2rem; border-radius: 24px; border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+        .auth-box { max-width: 420px; margin: 3rem auto; }
+        
+        .portal-main-grid {
+            display: grid; grid-template-columns: 290px 1fr 290px; gap: 1.5rem;
+            max-width: 1400px; margin: 0 auto; align-items: start;
+        }
+
+        .dashboard-card { border-top: 4px solid var(--primary); }
+        .side-card { font-size: 0.9rem; line-height: 1.6; border: 1px dashed rgba(255,255,255,0.1); }
+        .light-theme .side-card { border: 1px dashed rgba(15,23,42,0.15); }
+        .side-card h4 { margin-top: 0; color: #60a5fa; font-size: 1.1rem; border-bottom: 1px dashed var(--glass-border); padding-bottom: 0.5rem; }
+
+        input, select, textarea {
+            width: 100%; padding: 0.9rem 1rem; margin: 0.6rem 0;
+            background: rgba(15, 23, 42, 0.7); border: 1px solid var(--glass-border);
+            border-radius: 12px; color: var(--text-main); box-sizing: border-box;
+            font-size: 0.95rem; transition: all 0.3s ease;
+        }
+        .light-theme input, .light-theme select, .light-theme textarea { background: rgba(255,255,255,0.8); border: 1px solid #cbd5e1; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 15px var(--primary-glow); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white;
+            border: none; padding: 0.7rem 1.8rem; border-radius: 10px; cursor: pointer;
+            font-weight: 600; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); transition: all 0.3s ease;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5); }
+        
+        .btn-theme-toggle { background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: var(--text-main); padding: 0.6rem 1rem; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .light-theme .btn-theme-toggle { background: rgba(0,0,0,0.05); }
+
+        .btn-submit {
+            width: 100%; padding: 0.9rem; margin-top: 1rem; border-radius: 12px; border: none;
+            background: linear-gradient(90deg, #3b82f6, #2563eb); color: white;
+            font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 5px 15px var(--primary-glow); }
+        
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 0.6rem 1.4rem; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 0.8rem 1.6rem; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .btn-tab { padding: 0.6rem 1.2rem; margin-right: 0.5rem; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-main); cursor: pointer; border-radius: 8px; }
+        .btn-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+        .btn-nav-leave {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%); color: white;
+            border: none; padding: 0.6rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); transition: all 0.3s ease;
+        }
+        .btn-nav-review {
+            background: linear-gradient(135deg, var(--info) 0%, #0891b2 100%); color: white;
+            border: none; padding: 0.6rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2); transition: all 0.3s ease;
+        }
+        .btn-nav-review:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(6, 182, 212, 0.4); }
+
+        .cgpa-container {
+            margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+        }
+
+        .leave-status-banner { padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; font-weight: 700; font-size: 1.05rem; display: none; }
+        .status-approved-blink {
+            display: block; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981;
+            animation: statusGlowBlink 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes statusGlowBlink {
+            0% { opacity: 0.6; box-shadow: 0 0 5px rgba(16, 185, 129, 0.1); }
+            100% { opacity: 1; box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+        }
+
+        .placement-badge { padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; display: inline-block; margin-top: 0.5rem; }
+        .eligible-green { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .eligible-red { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+        .attendance-ring-card { display: flex; align-items: center; justify-content: space-around; background: rgba(0,0,0,0.15); padding: 1rem; border-radius: 14px; border: 1px solid var(--glass-border); margin-top: 1.5rem; }
+        .progress-circle { position: relative; width: 80px; height: 80px; }
+        .progress-circle svg { width: 80px; height: 80px; transform: rotate(-90deg); }
+        .progress-circle circle { width: 100%; height: 100%; fill: none; stroke-width: 8; stroke-linecap: round; }
+        .progress-circle circle:first-child { stroke: rgba(255,255,255,0.05); }
+        .progress-circle circle:last-child { stroke: var(--success); stroke-dasharray: 226; stroke-dashoffset: 226; transition: stroke-dashoffset 1s ease; }
+        .progress-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 700; font-size: 1.05rem; }
+
+        /* ==========================================================================
+           FIX UPDATE: DYNAMIC PERFORMANCE ANALYTICS (PURE CSS/HTML GRAPHICS MATRIX)
+           ========================================================================== */
+        .analytics-dashboard-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;
+        }
+        .stat-widget-box {
+            background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border);
+            padding: 1.2rem; border-radius: 16px; text-align: center;
+        }
+        .stat-widget-box h5 { margin: 0; color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-widget-box .stat-count-val { font-size: 1.8rem; font-weight: 800; margin-top: 0.4rem; color: #60a5fa; }
+        
+        .charts-flex-container {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; margin-bottom: 2rem;
+        }
+        .pure-chart-card {
+            background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border);
+            padding: 1.5rem; border-radius: 18px;
+        }
+        .pure-chart-card h4 { margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; color: #60a5fa; }
+        
+        /* Bar Graph Setup */
+        .analytics-bar-row { margin-bottom: 1rem; }
+        .analytics-bar-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem; }
+        .analytics-bar-track { width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; position: relative; }
+        .analytics-bar-fill { height: 100%; width: 0%; border-radius: 6px; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Color fills triggers mapping */
+        .fill-primary { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+        .fill-success { background: linear-gradient(90deg, #10b981, #059669); }
+        .fill-warning { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .fill-info { background: linear-gradient(90deg, #06b6d4, #0891b2); }
+
+        .table-responsive { background: rgba(15, 23, 42, 0.4); border-radius: 14px; overflow: hidden; border: 1px solid var(--glass-border); margin: 1.5rem 0; }
+        .light-theme .table-responsive { background: white; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 1rem; border-bottom: 1px solid var(--glass-border); }
+        th { background: rgba(30, 41, 59, 0.9); color: #60a5fa; }
+        .light-theme th { background: #e2e8f0; color: #1e3a8a; }
+        .inline-edit { background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); padding: 6px; color: white; text-align: center; border-radius: 6px; }
+        .light-theme .inline-edit { background: white; color: black; border: 1px solid #cbd5e1; }
+
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(7, 10, 18, 0.85); backdrop-filter: blur(10px); display:none; align-items:center; justify-content:center; z-index: 200; }
+        .modal-content { background: #111827; border: 1px solid var(--glass-border); padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 440px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
+        .light-theme .modal-content { background: white; color: black; }
+        .marks-display-card { background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border); padding: 1.2rem; margin-top: 1.5rem; border-radius: 12px; }
+
+        @media print {
+            .navbar, .admin-header, .admin-footer-actions, .btn-danger, th:last-child, td:last-child, .inline-edit, h2:not(.print-title), .table-responsive:last-of-type, .btn-theme-toggle, .analytics-dashboard-grid, .charts-flex-container { display: none !important; }
+            body { background: white; color: black; }
+            table { border: 1px solid #ccc; width: 100%; }
+            th { background: #eee; color: black; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="processor-bg-overlay"></div>
+
+    <header class="navbar">
+        <div class="logo">Paavai CSE</div>
+        <div class="nav-right-actions">
+            <button id="navReviewBtn" class="btn-nav-review" style="display: none;" onclick="openReviewModal()">Exam Review</button>
+            <button id="navLeaveBtn" class="btn-nav-leave" style="display: none;" onclick="openLeaveModal()">Apply Leave</button>
+            <button class="btn-theme-toggle" onclick="toggleThemeLayout()">Theme 🌗</button>
+            <button id="getStartedBtn" class="btn-primary" onclick="showSection('auth-section')">Get Started</button>
+            <button id="logoutBtn" class="btn-danger" style="display: none;" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section id="home-section" class="view-section active-view">
+            <div class="hero-content">
+                <h1>Paavai Engineering College</h1>
+                <h3>Department of Computer Science and Engineering</h3>
+                <div class="quote-container">
+                    <div class="quote visible-quote" id="q1">"Education is not the learning of facts, but the training of the mind to think."</div>
+                    <div class="quote" id="q2">"Technology is best when it brings people together."</div>
+                    <div class="quote" id="q3">"Empowering minds, engineering futures at Paavai Institutions."</div>
+                    <div class="quote" id="q4">"Innovation distinguishes between a leader and a follower."</div>
+                    <div class="quote" id="q5">"The beautiful thing about learning is that nobody can take it away from you."</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="auth-section" class="view-section">
+            <div class="auth-box">
+                <div id="login-card" style="display: block;">
+                    <h2 style="margin-top:0; text-align: center;">Portal Login</h2>
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <input type="text" id="loginUser" placeholder="Username / Reg No / Email" required>
+                        <input type="password" id="loginPass" placeholder="Password" required>
+                        <button type="submit" class="btn-submit">Sign In</button>
+                    </form>
+                    <p style="text-align: center; margin-top: 1.5rem; color: #94a3b8;">New Student? <a href="javascript:void(0)" style="color: #60a5fa; text-decoration: none; font-weight:600;" onclick="toggleAuth(true)">Register Here</a></p>
+                </div>
+
+                <div id="register-card" style="display: none;">
+                    <h2 style="margin-top:0; text-align: center;">Student Registration</h2>
+                    <form id="registerForm" onsubmit="handleRegister(event)">
+                        <input type="text" id="regName" placeholder="Full Name" required>
+                        <input type="text" id="regNum" placeholder="Register Number" required>
+                        <select id="regDept" required>
+                            <option value="" style="background:var(--dark-bg); color:var(--text-main);">Select Degree</option>
+                            <option value="B.E" style="background:var(--dark-bg); color:var(--text-main);">B.E - CSE</option>
+                            <option value="M.E" style="background:var(--dark-bg); color:var(--text-main);">M.E - CSE</option>
+                        </select>
+                        <input type="tel" id="regPhone" placeholder="Mobile Number" required>
+                        <input type="email" id="regEmail" placeholder="Email Address" required>
+                        <input type="password" id="regPass" placeholder="Create Password" required>
+                        <button type="submit" class="btn-submit">Submit Details</button>
+                    </form>
+                    <p style="text-align: center; margin-top: 1.5rem; color: #94a3b8;">Already registered? <a href="javascript:void(0)" style="color: #60a5fa; text-decoration: none; font-weight:600;" onclick="toggleAuth(false)">Login Here</a></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="student-section" class="view-section">
+            <div class="portal-main-grid">
+                
+                <div class="side-card">
+                    <h4>📢 CSE Notice Board</h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">• Continuous coding challenges uploaded inside hackers dashboard layout.</p>
+                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">• Internal Assessment target marks processing cycle activated by admin.</p>
+                    <hr style="border:0; border-top:1px dashed var(--glass-border); margin:1rem 0;">
+                    <h4>🚀 Drive Status</h4>
+                    <div id="placementBadgeContainer" class="placement-badge eligible-red">Evaluating...</div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div id="studentLeaveBlinkBanner" class="leave-status-banner"></div>
+
+                    <h2 style="margin-top: 0; color: #60a5fa;">Welcome, <span id="studentProfileName" style="color:white;">Student</span></h2>
+                    <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 1.2rem 0;">
+                    
+                    <div class="profile-details" style="line-height: 1.8;">
+                        <p><strong>Register No:</strong> <span id="profileReg"></span></p>
+                        <p><strong>Degree:</strong> <span id="profileDept"></span></p>
+                        <p><strong>Mobile No:</strong> <span id="profilePhone"></span></p>
+                        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                    </div>
+
+                    <div class="cgpa-container">
+                        <div>
+                            <strong style="color: #60a5fa; display:block;">Current CGPA score</strong>
+                            <span style="font-size:0.8rem; color:#94a3b8;">Keep your profile score updated</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" id="studentCgpaInput" step="0.01" min="0" max="10" placeholder="0.00" style="width:80px; margin:0; padding:0.5rem; text-align:center;">
+                            <button class="btn-primary" style="padding:0.5rem 1rem; border-radius:8px; font-size:0.85rem;" onclick="saveStudentCgpa()">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="attendance-ring-card">
+                        <div>
+                            <strong style="color:#60a5fa; display:block;">Portal Attendance Log</strong>
+                            <span style="font-size:0.8rem; color:#94a3b8;">Tracked by college registrar</span>
+                        </div>
+                        <div class="progress-circle">
+                            <svg><circle cx="40" cy="40" r="36"></circle><circle id="radialRingProgress" cx="40" cy="40" r="36"></circle></svg>
+                            <div id="attendancePercentVal" class="progress-value">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="marks-display-card">
+                        <h3 style="margin-top:0; color: #60a5fa; font-size: 1.1rem;">Internal Assessment Marks</h3>
+                        <p><strong>IA-1 Mark:</strong> <span id="viewIa1" style="font-weight: 600; color:#10b981;">Not Evaluated</span></p>
+                        <p><strong>IA-2 Mark:</strong> <span id="viewIa2" style="font-weight: 600; color:#10b981;">Not Evaluated</span></p>
+                    </div>
+
+                    <h4 style="color:#60a5fa; margin-top:2rem; margin-bottom:0.5rem;">Your Leave Request Logs</h4>
+                    <div style="font-size:0.85rem; border:1px solid var(--glass-border); padding:0.8rem; border-radius:10px; background:rgba(0,0,0,0.1);" id="studentLeaveLogBox">No request filed.</div>
+                </div>
+
+                <div class="side-card">
+                    <h4>💼 Internship & Mini Projects</h4>
+                    <p style="font-weight:600; margin-bottom:0.2rem;">Full-Stack Java App</p>
+                    <span style="font-size:0.75rem; color:#94a3b8; display:block; margin-bottom:0.8rem;">Tech: Spring Boot, React, MySQL</span>
+                    
+                    <p style="font-weight:600; margin-bottom:0.2rem;">AI Resume Builder</p>
+                    <span style="font-size:0.75rem; color:#94a3b8; display:block; margin-bottom:0.8rem;">Tech: JS, LocalStorage Engine</span>
+                    <hr style="border:0; border-top:1px dashed var(--glass-border); margin:1rem 0;">
+                    <div style="background:rgba(59,130,246,0.1); border-radius:8px; padding:0.5rem; text-align:center; color:#60a5fa; font-size:0.8rem; font-weight:600;">Placement Drive Active</div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ADMIN SECTION PANEL -->
+        <section id="admin-section" class="view-section">
+            <div class="admin-box" style="max-width: 100%;">
+                
+                <!-- ==========================================================
+                     FIX UPDATE: LIVE CSS ANALYTICS PANEL PLACEMENT HUB
+                     ========================================================== -->
+                <div class="analytics-dashboard-grid">
+                    <div class="stat-widget-box">
+                        <h5>Total Registered</h5>
+                        <div id="statTotalStudents" class="stat-count-val">0</div>
+                    </div>
+                    <div class="stat-widget-box">
+                        <h5>B.E Strengths</h5>
+                        <div id="statTotalBE" class="stat-count-val" style="color: #a78bfa;">0</div>
+                    </div>
+                    <div class="stat-widget-box">
+                        <h5>M.E Strengths</h5>
+                        <div id="statTotalME" class="stat-count-val" style="color: #f472b6;">0</div>
+                    </div>
+                    <div class="stat-widget-box">
+                        <h5>Leave Forms Filed</h5>
+                        <div id="statTotalLeaves" class="stat-count-val" style="color: #f59e0b;">0</div>
+                    </div>
+                </div>
+
+                <!-- Dual Layout Analytics Graphics Tracks -->
+                <div class="charts-flex-container">
+                    <!-- Graph 1: IA Performance Ratio Mapping -->
+                    <div class="pure-chart-card">
+                        <h4>📈 IA Marks Evaluation Ratio</h4>
+                        <div class="analytics-bar-row">
+                            <div class="analytics-bar-label"><span>IA-1 Graded Pass Percentage (>50%)</span><span id="labelBarIa1">0%</span></div>
+                            <div class="analytics-bar-track"><div id="barFillIa1" class="analytics-bar-fill fill-success"></div></div>
+                        </div>
+                        <div class="analytics-bar-row">
+                            <div class="analytics-bar-label"><span>IA-2 Graded Pass Percentage (>50%)</span><span id="labelBarIa2">0%</span></div>
+                            <div class="analytics-bar-track"><div id="barFillIa2" class="analytics-bar-fill fill-primary"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Graph 2: Degree Strengths Layout Ratio Metrics -->
+                    <div class="pure-chart-card">
+                        <h4>🎓 Batch Wise Distribution</h4>
+                        <div class="analytics-bar-row">
+                            <div class="analytics-bar-label"><span>B.E - Computer Science & Eng. Ratio</span><span id="labelBarBERatio">0%</span></div>
+                            <div class="analytics-bar-track"><div id="barFillBE" class="analytics-bar-fill fill-warning"></div></div>
+                        </div>
+                        <div class="analytics-bar-row">
+                            <div class="analytics-bar-label"><span>M.E - Computer Science & Eng. Ratio</span><span id="labelBarMERatio">0%</span></div>
+                            <div class="analytics-bar-track"><div id="barFillME" class="analytics-bar-fill fill-info"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-header">
+                    <h2 style="margin:0; font-size: 1.8rem;">Admin Control Center</h2>
+                    <div>
+                        <button class="btn-tab active" onclick="filterAdminData('ALL')">All Students</button>
+                        <button class="btn-tab" onclick="filterAdminData('B.E')">B.E Details</button>
+                        <button class="btn-tab" onclick="filterAdminData('M.E')">M.E Details</button>
+                        <button class="btn-tab" style="background:var(--success); border:none;" onclick="openAddStudentModal()">+ Add Student</button>
+                    </div>
+                </div>
+
+                <div style="max-width: 400px; margin-bottom: 1rem;">
+                    <input type="text" id="adminTableSearchInput" placeholder="🔍 Search student name or register number..." style="margin:0;" oninput="handleAdminSearchFilter()">
+                </div>
+
+                <h3 class="print-title" style="color: #60a5fa; margin-top:1rem; margin-bottom: 0.5rem;">Student Academic Records</h3>
+                <div class="table-responsive">
+                    <table id="studentTable">
+                        <thead>
+                            <tr>
+                                <th>Reg No</th>
+                                <th>Name</th>
+                                <th>Degree</th>
+                                <th>Mobile</th>
+                                <th>CGPA</th>
+                                <th>Attendance %</th>
+                                <th>IA-1</th>
+                                <th>IA-2</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody"></tbody>
+                    </table>
+                </div>
+                
+                <h3 style="color: #60a5fa; margin-top: 3rem; margin-bottom: 0.5rem;">Submitted Leave Applications Tracking</h3>
+                <div class="table-responsive">
+                    <table id="leaveTable">
+                        <thead>
+                            <tr>
+                                <th>Reg No</th>
+                                <th>Name</th>
+                                <th>Student Mobile</th>
+                                <th>Parent Mobile</th>
+                                <th>Reason of Leave</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaveTableBody"></tbody>
+                    </table>
+                </div>
+
+                <h3 style="color: #06b6d4; margin-top: 3rem; margin-bottom: 0.5rem;">Student Exam Reviews & Feedback Logs</h3>
+                <div class="table-responsive">
+                    <table id="reviewTable">
+                        <thead>
+                            <tr>
+                                <th>Reg No</th>
+                                <th>Name</th>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Review in Exam</th>
+                                <th>Feedback Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewTableBody"></tbody>
+                    </table>
+                </div>
+                
+                <div class="admin-footer-actions" style="margin-top: 2rem;">
+                    <button class="btn-success" onclick="downloadCSV()">Export Master CSV Report</button>
+                    <button class="btn-primary" style="background:#475569; box-shadow:none;" onclick="window.print()">Print Records Portal</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0; color:var(--info); text-align: center;">Exam Review & Feedback</h2>
+            <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 1rem 0;">
+            <form id="examReviewForm" onsubmit="handleReviewSubmit(event)">
+                <input type="text" id="reviewSubCode" placeholder="Subject Code (e.g., CS3401)" required>
+                <input type="text" id="reviewSubName" placeholder="Subject Name" required>
+                <select id="reviewStatus" required>
+                    <option value="" style="background:var(--dark-bg); color:var(--text-main);">Review in Exam</option>
+                    <option value="Easy" style="background:var(--dark-bg); color:var(--text-main);">Easy</option>
+                    <option value="Moderate" style="background:var(--dark-bg); color:var(--text-main);">Moderate</option>
+                    <option value="Tough" style="background:var(--dark-bg); color:var(--text-main);">Tough</option>
+                </select>
+                <textarea id="reviewFeedback" rows="4" placeholder="Enter your detailed feedback/suggestions here..." required></textarea>
+                <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-submit" style="margin-top:0; background: linear-gradient(90deg, var(--info), #0891b2);">Submit Review</button>
+                    <button type="button" class="btn-danger" style="border-radius:12px;" onclick="closeReviewModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="leaveModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0; color:#60a5fa; text-align: center;">Apply Leave Form</h2>
+            <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 1rem 0;">
+            <form id="leaveApplicationForm" onsubmit="handleLeaveSubmit(event)">
+                <input type="text" id="leaveReg" placeholder="Register Number" required>
+                <input type="text" id="leaveName" placeholder="Full Name" required>
+                <input type="tel" id="leavePhone" placeholder="Student Mobile Number" required>
+                <input type="tel" id="leaveParentPhone" placeholder="Parent Mobile Number" required>
+                <textarea id="leaveReason" rows="3" placeholder="Reason for Leave Request..." required></textarea>
+                <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-submit" style="margin-top:0; background: linear-gradient(90deg, #10b981, #059669);">Submit Form</button>
+                    <button type="button" class="btn-danger" style="border-radius:12px;" onclick="closeLeaveModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0; color:#60a5fa;">Add New Student</h3>
+            <form id="adminAddForm" onsubmit="adminAddStudent(event)">
+                <input type="text" id="admName" placeholder="Name" required>
+                <input type="text" id="admReg" placeholder="Reg No" required>
+                <select id="admDept" required>
+                    <option value="B.E">B.E</option>
+                    <option value="M.E">M.E</option>
+                </select>
+                <input type="tel" id="admPhone" placeholder="Mobile Number" required>
+                <input type="email" id="admEmail" placeholder="Email" required>
+                <input type="password" id="admPass" placeholder="Password" value="123456" required>
+                <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-submit" style="margin-top:0;">Add Entry</button>
+                    <button type="button" class="btn-danger" style="border-radius:12px;" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('students')) localStorage.setItem('students', JSON.stringify([]));
+        if (!localStorage.getItem('leaves')) localStorage.setItem('leaves', JSON.stringify([]));
+        if (!localStorage.getItem('reviews')) localStorage.setItem('reviews', JSON.stringify([]));
+
+        let currentFilter = 'ALL';
+        let loggedInUserObject = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeSessionUser = sessionStorage.getItem('activeUserSessionToken');
+            if (activeSessionUser) {
+                if (activeSessionUser === 'ADMIN_MASTER_ROOT') {
+                    renderAdminTable();
+                    renderLeaveTable();
+                    renderReviewTable();
+                    showSection('admin-section');
+                } else {
+                    let students = JSON.parse(localStorage.getItem('students'));
+                    const matchedStudent = students.find(s => s.regNo === activeSessionUser);
+                    if (matchedStudent) {
+                        loggedInUserObject = matchedStudent;
+                        loadStudentDashboard(matchedStudent);
+                        showSection('student-section');
+                    }
+                }
+            }
+        });
+
+        function toggleThemeLayout() {
+            document.body.classList.toggle('light-theme');
+        }
+
+        let currentQuoteIndex = 1;
+        setInterval(() => {
+            const activeQuote = document.getElementById(`q${currentQuoteIndex}`);
+            if(activeQuote) activeQuote.classList.remove('visible-quote');
+            currentQuoteIndex = currentQuoteIndex >= 5 ? 1 : currentQuoteIndex + 1;
+            const nextQuote = document.getElementById(`q${currentQuoteIndex}`);
+            if(nextQuote) nextQuote.classList.add('visible-quote');
+        }, 3000);
+
+        function showSection(sectionId) {
+            const sections = ['home-section', 'auth-section', 'student-section', 'admin-section'];
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active-view');
+            });
+
+            setTimeout(() => {
+                sections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+
+                const target = document.getElementById(sectionId);
+                if (target) {
+                    target.style.display = 'block';
+                    target.offsetHeight; 
+                    target.classList.add('active-view');
+                    
+                    // FIX TRIGGER: Admin view open aagumbodhu andha real-time counters calculations reset aavanum
+                    if(sectionId === 'admin-section') {
+                        calculatePerformanceAnalytics();
+                    }
+                }
+            }, 150);
+
+            const getStartedBtn = document.getElementById('getStartedBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const navLeaveBtn = document.getElementById('navLeaveBtn');
+            const navReviewBtn = document.getElementById('navReviewBtn');
+
+            if (sectionId === 'home-section' || sectionId === 'auth-section') {
+                if (getStartedBtn) getStartedBtn.style.display = 'block';
+                if (logoutBtn) logoutBtn.style.display = 'none';
+                if (navLeaveBtn) navLeaveBtn.style.display = 'none';
+                if (navReviewBtn) navReviewBtn.style.display = 'none';
+                if (sectionId === 'auth-section') toggleAuth(false);
+            } else if (sectionId === 'student-section') {
+                if (getStartedBtn) getStartedBtn.style.display = 'none';
+                if (logoutBtn) logoutBtn.style.display = 'block';
+                if (navLeaveBtn) navLeaveBtn.style.display = 'block';
+                if (navReviewBtn) navReviewBtn.style.display = 'block';
+            } else {
+                if (getStartedBtn) getStartedBtn.style.display = 'none';
+                if (logoutBtn) logoutBtn.style.display = 'block';
+                if (navLeaveBtn) navLeaveBtn.style.display = 'none';
+                if (navReviewBtn) navReviewBtn.style.display = 'none';
+            }
+        }
+
+        function toggleAuth(showRegister) {
+            document.getElementById('login-card').style.display = showRegister ? 'none' : 'block';
+            document.getElementById('register-card').style.display = showRegister ? 'block' : 'none';
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const regNo = document.getElementById('regNum').value.trim();
+            const dept = document.getElementById('regDept').value;
+            const phone = document.getElementById('regPhone').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+
+            let students = JSON.parse(localStorage.getItem('students'));
+            if (students.some(s => s.regNo === regNo)) { alert("Register number already exists!"); return; }
+
+            students.push({ name, regNo, dept, phone, email, password, ia1: '', ia2: '', cgpa: '0.00', attendance: '85' });
+            localStorage.setItem('students', JSON.stringify(students));
+
+            alert("Your data stored safely!");
+            document.getElementById('registerForm').reset();
+            toggleAuth(false);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value;
+
+            if (user === 'admin_cse' && pass === 'paavai@admin') {
+                sessionStorage.setItem('activeUserSessionToken', 'ADMIN_MASTER_ROOT');
+                renderAdminTable();
+                renderLeaveTable();
+                renderReviewTable();
+                showSection('admin-section');
+                return;
+            }
+
+            let students = JSON.parse(localStorage.getItem('students'));
+            const matchedStudent = students.find(s => (s.regNo === user || s.email === user) && s.password === pass);
+
+            if (matchedStudent) {
+                loggedInUserObject = matchedStudent;
+                sessionStorage.setItem('activeUserSessionToken', matchedStudent.regNo);
+                loadStudentDashboard(matchedStudent);
+                showSection('student-section');
+            } else {
+                alert("Invalid Identification Credentials!");
+            }
+        }
+
+        function checkStudentLeaveNotification(regNo) {
+            const banner = document.getElementById('studentLeaveBlinkBanner');
+            const logBox = document.getElementById('studentLeaveLogBox');
+            if(!banner) return;
+
+            let leaves = JSON.parse(localStorage.getItem('leaves')) || [];
+            const studentLeave = leaves.find(l => l.regNo === regNo);
+
+            if(studentLeave) {
+                logBox.innerHTML = `Reason: <strong>${studentLeave.reason}</strong> <br> Status Badge: <span style="font-weight:700;">${studentLeave.status}</span>`;
+                if(studentLeave.status === 'Approved') {
+                    banner.innerText = "🎉 Your Leave Application is Approved!";
+                    banner.className = "leave-status-banner status-approved-blink";
+                } else if (studentLeave.status === 'Rejected') {
+                    banner.innerText = "❌ Your Leave Application was Rejected.";
+                    banner.className = "leave-status-banner";
+                    banner.style.display = "block";
+                    banner.style.background = "rgba(239, 68, 68, 0.15)";
+                    banner.style.border = "1px solid #ef4444";
+                    banner.style.color = "#ef4444";
+                } else {
+                    banner.style.display = "none";
+                }
+            } else {
+                banner.style.display = "none";
+                logBox.innerText = "No request records filed inside cache memory.";
+            }
+        }
+
+        function loadStudentDashboard(student) {
+            document.getElementById('studentProfileName').innerText = student.name;
+            document.getElementById('profileReg').innerText = student.regNo;
+            document.getElementById('profileDept').innerText = student.dept;
+            document.getElementById('profilePhone').innerText = student.phone || 'N/A';
+            document.getElementById('profileEmail').innerText = student.email;
+            
+            document.getElementById('viewIa1').innerText = student.ia1 || 'Not Evaluated';
+            document.getElementById('viewIa2').innerText = student.ia2 || 'Not Evaluated';
+            document.getElementById('studentCgpaInput').value = student.cgpa || '';
+
+            document.getElementById('leaveReg').value = student.regNo;
+            document.getElementById('leaveName').value = student.name;
+            document.getElementById('leavePhone').value = student.phone || '';
+
+            const badge = document.getElementById('placementBadgeContainer');
+            const cgpaScore = parseFloat(student.cgpa || 0);
+            if(cgpaScore >= 7.5) {
+                badge.innerText = "Eligible for Placements";
+                badge.className = "placement-badge eligible-green";
+            } else {
+                badge.innerText = "Criteria Not Met (Below 7.5)";
+                badge.className = "placement-badge eligible-red";
+            }
+
+            const attScore = parseInt(student.attendance || 75);
+            document.getElementById('attendancePercentVal').innerText = attScore + "%";
+            const offsetVal = 226 - (226 * attScore) / 100;
+            document.getElementById('radialRingProgress').style.strokeDashoffset = offsetVal;
+
+            checkStudentLeaveNotification(student.regNo);
+        }
+
+        function saveStudentCgpa() {
+            const cgpaVal = parseFloat(document.getElementById('studentCgpaInput').value).toFixed(2);
+            if(!loggedInUserObject || isNaN(cgpaVal)) return;
+
+            let students = JSON.parse(localStorage.getItem('students'));
+            let target = students.find(s => s.regNo === loggedInUserObject.regNo);
+            if(target) {
+                target.cgpa = cgpaVal;
+                loggedInUserObject.cgpa = cgpaVal;
+                localStorage.setItem('students', JSON.stringify(students));
+                alert("CGPA Profile Score Saved Successfully!");
+                loadStudentDashboard(target); 
+            }
+        }
+
+        function openLeaveModal() { document.getElementById('leaveModal').style.display = 'flex'; }
+        function closeLeaveModal() { document.getElementById('leaveModal').style.display = 'none'; }
+
+        function openReviewModal() { document.getElementById('reviewModal').style.display = 'flex'; }
+        function closeReviewModal() { document.getElementById('reviewModal').style.display = 'none'; }
+
+        function handleLeaveSubmit(e) {
+            e.preventDefault();
+            const regNo = document.getElementById('leaveReg').value;
+            const name = document.getElementById('leaveName').value;
+            const studentPhone = document.getElementById('leavePhone').value;
+            const parentPhone = document.getElementById('leaveParentPhone').value;
+            const reason = document.getElementById('leaveReason').value;
+
+            let leaves = JSON.parse(localStorage.getItem('leaves'));
+            leaves = leaves.filter(l => l.regNo !== regNo);
+            leaves.push({ regNo, name, studentPhone, parentPhone, reason, status: 'Pending Review' });
+            localStorage.setItem('leaves', JSON.stringify(leaves));
+
+            alert("Leave Form Submitted Safely!");
+            document.getElementById('leaveParentPhone').value = '';
+            document.getElementById('leaveReason').value = '';
+            closeLeaveModal();
+            checkStudentLeaveNotification(regNo);
+        }
+
+        function handleReviewSubmit(e) {
+            e.preventDefault();
+            if(!loggedInUserObject) return;
+
+            const subCode = document.getElementById('reviewSubCode').value;
+            const subName = document.getElementById('reviewSubName').value;
+            const status = document.getElementById('reviewStatus').value;
+            const feedback = document.getElementById('reviewFeedback').value;
+
+            let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+            reviews.push({
+                regNo: loggedInUserObject.regNo,
+                name: loggedInUserObject.name,
+                subCode, subName, status, feedback
+            });
+
+            localStorage.setItem('reviews', JSON.stringify(reviews));
+            alert("Exam Review & Feedback Form Submitted Safely!");
+            document.getElementById('examReviewForm').reset();
+            closeReviewModal();
+        }
+
+        /**
+         * =========================================================================
+         * FIX FUNCTION CORE ENGINE: REALTIME PERFORMANCE ANALYTICS CALCULATOR MATRICES
+         * =========================================================================
+         */
+        function calculatePerformanceAnalytics() {
+            let students = JSON.parse(localStorage.getItem('students')) || [];
+            let leaves = JSON.parse(localStorage.getItem('leaves')) || [];
+
+            // 1. Core widgets parameters lookup values assignment
+            const totalCount = students.length;
+            const totalBE = students.filter(s => s.dept === 'B.E').length;
+            const totalME = students.filter(s => s.dept === 'M.E').length;
+            const totalLeavesCount = leaves.length;
+
+            document.getElementById('statTotalStudents').innerText = totalCount;
+            document.getElementById('statTotalBE').innerText = totalBE;
+            document.getElementById('statTotalME').innerText = totalME;
+            document.getElementById('statTotalLeaves').innerText = totalLeavesCount;
+
+            if(totalCount === 0) return; // Zero duplication bypass protection loops 
+
+            // 2. Bar Graph calculations: Degree distributions ratio formulas updates
+            const beRatio = Math.round((totalBE / totalCount) * 100);
+            const meRatio = Math.round((totalME / totalCount) * 100);
+
+            document.getElementById('labelBarBERatio').innerText = beRatio + "%";
+            document.getElementById('barFillBE').style.width = beRatio + "%";
+            document.getElementById('labelBarMERatio').innerText = meRatio + "%";
+            document.getElementById('barFillME').style.width = meRatio + "%";
+
+            // 3. Bar Graph calculations: Evaluation of pass/fail percentage matrices based on input score
+            let ia1PassCount = 0, ia2PassCount = 0;
+            let gradedStudentsCount1 = 0, gradedStudentsCount2 = 0;
+
+            students.forEach(s => {
+                if(s.ia1 && s.ia1 !== '') {
+                    gradedStudentsCount1++;
+                    if(parseInt(s.ia1) >= 50) ia1PassCount++;
+                }
+                if(s.ia2 && s.ia2 !== '') {
+                    gradedStudentsCount2++;
+                    if(parseInt(s.ia2) >= 50) ia2PassCount++;
+                }
+            });
+
+            const ia1PassRatio = gradedStudentsCount1 > 0 ? Math.round((ia1PassCount / gradedStudentsCount1) * 100) : 0;
+            const ia2PassRatio = gradedStudentsCount2 > 0 ? Math.round((ia2PassCount / gradedStudentsCount2) * 100) : 0;
+
+            document.getElementById('labelBarIa1').innerText = ia1PassRatio + "%";
+            document.getElementById('barFillIa1').style.width = ia1PassRatio + "%";
+            document.getElementById('labelBarIa2').innerText = ia2PassRatio + "%";
+            document.getElementById('barFillIa2').style.width = ia2PassRatio + "%";
+        }
+
+        function handleAdminSearchFilter() {
+            const query = document.getElementById('adminTableSearchInput').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#studentTableBody tr');
+            tableRows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        function renderAdminTable() {
+            let students = JSON.parse(localStorage.getItem('students'));
+            const tbody = document.getElementById('studentTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            const filtered = students.filter(s => currentFilter === 'ALL' || s.dept === currentFilter);
+
+            filtered.forEach((student) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${student.regNo}</td>
+                    <td style="font-weight:600;">${student.name}</td>
+                    <td><span style="background:rgba(96,165,250,0.15); color:#60a5fa; padding:3px 8px; border-radius:6px; font-size:0.85rem;">${student.dept}</span></td>
+                    <td>${student.phone || 'N/A'}</td>
+                    <td style="font-weight:700; color:#f59e0b;">${student.cgpa || '0.00'}</td>
+                    <td>
+                        <input type="number" class="inline-edit" value="${student.attendance || '85'}" style="width:50px;"
+                            onchange="updateAdminStudentMutableField('${student.regNo}', 'attendance', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" class="inline-edit" value="${student.ia1 || ''}" placeholder="Set" style="width: 45px;"
+                            onchange="updateAdminStudentMutableField('${student.regNo}', 'ia1', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" class="inline-edit" value="${student.ia2 || ''}" placeholder="Set" style="width: 45px;"
+                            onchange="updateAdminStudentMutableField('${student.regNo}', 'ia2', this.value)">
+                    </td>
+                    <td><button class="btn-danger" style="padding:4px 8px;" onclick="deleteStudent('${student.regNo}')">Delete</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            calculatePerformanceAnalytics(); // Refresh graphs alongside row structural generation operations
+        }
+
+        function updateAdminStudentMutableField(regNo, databaseFieldKey, injectedValue) {
+            let students = JSON.parse(localStorage.getItem('students'));
+            let student = students.find(s => s.regNo === regNo);
+            if (student) {
+                student[databaseFieldKey] = injectedValue;
+                localStorage.setItem('students', JSON.stringify(students));
+            }
+            calculatePerformanceAnalytics(); // Trigger live chart graph fill animations instantly
+        }
+
+        function renderLeaveTable() {
+            let leaves = JSON.parse(localStorage.getItem('leaves'));
+            const tbody = document.getElementById('leaveTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            if(leaves.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No Leave Applications Logged Yet.</td></tr>';
+                return;
+            }
+
+            leaves.forEach((leave, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${leave.regNo}</td>
+                    <td>${leave.name}</td>
+                    <td>${leave.studentPhone}</td>
+                    <td>${leave.parentPhone}</td>
+                    <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${leave.reason}</td>
+                    <td>
+                        <select onchange="updateLeaveStatus(${idx}, this.value)" style="padding:4px; margin:0; width:130px; font-size:0.85rem; background:#111827; color:white; border:1px solid var(--glass-border); border-radius:6px;">
+                            <option value="Pending Review" ${leave.status === 'Pending Review'?'selected':''}>Pending Review</option>
+                            <option value="Approved" ${leave.status === 'Approved'?'selected':''}>Approved</option>
+                            <option value="Rejected" ${leave.status === 'Rejected'?'selected':''}>Rejected</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            calculatePerformanceAnalytics();
+        }
+
+        function renderReviewTable() {
+            let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+            const tbody = document.getElementById('reviewTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            if(reviews.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No Student Exam Reviews Registered Yet.</td></tr>';
+                return;
+            }
+
+            reviews.forEach(review => {
+                const tr = document.createElement('tr');
+                let reviewColor = '#10b981'; 
+                if(review.status === 'Moderate') reviewColor = '#f59e0b';
+                if(review.status === 'Tough') reviewColor = '#ef4444';
+
+                tr.innerHTML = `
+                    <td>${review.regNo}</td>
+                    <td>${review.name}</td>
+                    <td style="font-weight:600; color:#60a5fa;">${review.subCode}</td>
+                    <td>${review.subName}</td>
+                    <td><span style="color:${reviewColor}; font-weight:700;">${review.status}</span></td>
+                    <td style="max-width:250px; word-wrap:break-word;">${review.feedback}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateLeaveStatus(index, newStatus) {
+            let leaves = JSON.parse(localStorage.getItem('leaves'));
+            leaves[index].status = newStatus;
+            localStorage.setItem('leaves', JSON.stringify(leaves));
+            calculatePerformanceAnalytics();
+        }
+
+        function filterAdminData(category) {
+            currentFilter = category;
+            document.querySelectorAll('.btn-tab').forEach(btn => btn.classList.remove('active'));
+            if (window.event && window.event.target) window.event.target.classList.add('active');
+            renderAdminTable();
+        }
+
+        function openAddStudentModal() { document.getElementById('addStudentModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('addStudentModal').style.display = 'none'; }
+
+        function adminAddStudent(e) {
+            e.preventDefault();
+            const name = document.getElementById('admName').value;
+            const regNo = document.getElementById('admReg').value.trim();
+            const dept = document.getElementById('admDept').value;
+            const phone = document.getElementById('admPhone').value;
+            const email = document.getElementById('admEmail').value;
+            const password = document.getElementById('admPass').value;
+
+            let students = JSON.parse(localStorage.getItem('students'));
+            if (students.some(s => s.regNo === regNo)) { alert("Reg No already exists!"); return; }
+
+            students.push({ name, regNo, dept, phone, email, password, ia1: '', ia2: '', cgpa: '0.00', attendance: '85' });
+            localStorage.setItem('students', JSON.stringify(students));
+            closeModal();
+            document.getElementById('adminAddForm').reset();
+            renderAdminTable();
+        }
+
+        function deleteStudent(regNo) {
+            if (confirm("Are you sure you want to delete this student entry?")) {
+                let students = JSON.parse(localStorage.getItem('students'));
+                students = students.filter(s => s.regNo !== regNo);
+                localStorage.setItem('students', JSON.stringify(students));
+                renderAdminTable();
+            }
+        }
+
+        function downloadCSV() {
+            let students = JSON.parse(localStorage.getItem('students'));
+            let csvContent = "data:text/csv;charset=utf-8,Reg No,Name,Degree,Mobile,CGPA,Attendance %,IA-1,IA-2\n";
+            students.forEach(s => {
+                csvContent += `${s.regNo},${s.name},${s.dept},${s.phone || 'N/A'},${s.cgpa || '0.00'},${s.attendance || '85'},${s.ia1 || 0},${s.ia2 || 0}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Paavai_CSE_Master_Report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function logout() { 
+            loggedInUserObject = null; 
+            sessionStorage.removeItem('activeUserSessionToken');
+            showSection('home-section'); 
+        }
+    </script>
+</body>
+</html>
